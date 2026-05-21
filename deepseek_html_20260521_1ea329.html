@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Response Bot</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 600px;
+            width: 100%;
+            overflow: hidden;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+
+        .chat-area {
+            padding: 30px;
+            background: #f8f9fa;
+            min-height: 400px;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .message {
+            margin-bottom: 20px;
+            display: flex;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateX(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .user-message {
+            justify-content: flex-end;
+        }
+
+        .bot-message {
+            justify-content: flex-start;
+        }
+
+        .message-content {
+            max-width: 70%;
+            padding: 12px 18px;
+            border-radius: 18px;
+            word-wrap: break-word;
+        }
+
+        .user-message .message-content {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+
+        .bot-message .message-content {
+            background: white;
+            color: #333;
+            border: 1px solid #e0e0e0;
+            border-bottom-left-radius: 4px;
+        }
+
+        .input-area {
+            padding: 20px;
+            background: white;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            gap: 10px;
+        }
+
+        input {
+            flex: 1;
+            padding: 12px 18px;
+            border: 2px solid #e0e0e0;
+            border-radius: 25px;
+            font-size: 16px;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        input:focus {
+            border-color: #764ba2;
+            box-shadow: 0 0 10px rgba(118, 75, 162, 0.2);
+        }
+
+        button {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .typing {
+            display: inline-block;
+            width: 20px;
+            text-align: center;
+        }
+
+        .typing span {
+            animation: blink 1.4s infinite;
+            animation-fill-mode: both;
+        }
+
+        .typing span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes blink {
+            0%, 60%, 100% {
+                opacity: 0;
+            }
+            30% {
+                opacity: 1;
+            }
+        }
+
+        .quick-buttons {
+            display: flex;
+            gap: 10px;
+            padding: 0 20px 20px 20px;
+            flex-wrap: wrap;
+        }
+
+        .quick-btn {
+            padding: 8px 15px;
+            background: #f0f0f0;
+            color: #764ba2;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s;
+        }
+
+        .quick-btn:hover {
+            background: #764ba2;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+            }
+            
+            .message-content {
+                max-width: 85%;
+                font-size: 14px;
+            }
+            
+            .header h1 {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🤖 Smart Response Bot</h1>
+            <p>Ask me anything! I'm here to help 😊</p>
+        </div>
+        
+        <div class="chat-area" id="chatArea">
+            <div class="message bot-message">
+                <div class="message-content">
+                    👋 Hello! I'm your smart assistant. <br>
+                    Try asking me:<br>
+                    • "How are you?"<br>
+                    • "Tell me a joke"<br>
+                    • "What's the time?"<br>
+                    • "Help me with something"
+                </div>
+            </div>
+        </div>
+        
+        <div class="quick-buttons">
+            <div class="quick-btn" onclick="sendQuickMessage('Hello')">👋 Hello</div>
+            <div class="quick-btn" onclick="sendQuickMessage('How are you?')">😊 How are you?</div>
+            <div class="quick-btn" onclick="sendQuickMessage('Tell me a joke')">😂 Joke</div>
+            <div class="quick-btn" onclick="sendQuickMessage('What is AI?')">🤖 What is AI?</div>
+            <div class="quick-btn" onclick="sendQuickMessage('Help')">🆘 Help</div>
+        </div>
+        
+        <div class="input-area">
+            <input type="text" id="userInput" placeholder="Type your message here..." onkeypress="handleKeyPress(event)">
+            <button onclick="sendMessage()">Send 📤</button>
+        </div>
+    </div>
+
+    <script>
+        // Smart response system
+        function getBotResponse(userInput) {
+            const input = userInput.toLowerCase().trim();
+            
+            // Greetings
+            if (input.match(/hello|hi|hey|hola/)) {
+                return "Hello! 👋 Nice to meet you! How can I help you today?";
+            }
+            
+            // How are you
+            if (input.match(/how are you|how's it going|how do you do/)) {
+                return "I'm doing fantastic! 💫 Thanks for asking. I'm here and ready to help you!";
+            }
+            
+            // Name
+            if (input.match(/your name|who are you|what are you/)) {
+                return "I'm Smart Response Bot! 🤖 Your friendly AI assistant created to help answer your questions and have conversations.";
+            }
+            
+            // Time
+            if (input.match(/time|clock|what time|current time/)) {
+                const now = new Date();
+                const timeString = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                return `🕐 The current time is ${timeString}. Is there anything else you'd like to know?`;
+            }
+            
+            // Date
+            if (input.match(/date|today|day|what date/)) {
+                const now = new Date();
+                const dateString = now.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+                return `📅 Today is ${dateString}. Need help planning something?`;
+            }
+            
+            // Jokes
+            if (input.match(/joke|funny|laugh/)) {
+                const jokes = [
+                    "Why don't scientists trust atoms? Because they make up everything! 🧪",
+                    "What do you call a fake noodle? An impasta! 🍝",
+                    "Why did the scarecrow win an award? He was outstanding in his field! 🌾",
+                    "What do you call a bear with no teeth? A gummy bear! 🐻",
+                    "Why don't eggs tell jokes? They'd crack each other up! 🥚"
+                ];
+                return jokes[Math.floor(Math.random() * jokes.length)] + " 😂";
+            }
+            
+            // AI Questions
+            if (input.match(/what is ai|artificial intelligence|what is artificial intelligence/)) {
+                return "Artificial Intelligence (AI) 🤖 is the simulation of human intelligence in machines that are programmed to think and learn. I'm a simple example of AI in action!";
+            }
+            
+            // Help
+            if (input.match(/help|what can you do|capabilities/)) {
+                return "🆘 Here's what I can do:\n• Answer questions\n• Tell time and date\n• Crack jokes\n• Have conversations\n• Provide information\n\nJust type anything and I'll try my best to help!";
+            }
+            
+            // Weather (simple response)
+            if (input.match(/weather|temperature|rain|sunny/)) {
+                return "🌤️ I wish I could check the weather for you! For accurate weather info, you might want to check a weather app or website. But I hope it's a beautiful day wherever you are!";
+            }
+            
+            // Thanks
+            if (input.match(/thank|thanks|appreciate/)) {
+                return "You're very welcome! 🙏 I'm glad I could help. Feel free to ask me anything else!";
+            }
+            
+            // Goodbye
+            if (input.match(/bye|goodbye|see you|farewell/)) {
+                return "Goodbye! 👋 It was nice talking to you. Come back anytime you need help!";
+            }
+            
+            // Love/Crush
+            if (input.match(/love|crush|like you/)) {
+                return "Aww, that's sweet! 💖 I like you too! You're awesome! 😊";
+            }
+            
+            // Default response for unrecognized input
+            const defaultResponses = [
+                "That's interesting! 🤔 Could you tell me more?",
+                "I see! 😊 How can I help you with that?",
+                "Thanks for sharing! 💫 Is there anything specific you'd like to know?",
+                "Hmm, let me think about that... 🤔 In the meantime, ask me about jokes, time, or just say hello!",
+                "I'm still learning! 📚 Could you rephrase that or ask me something else?"
+            ];
+            
+            return defaultResponses[Math.floor(Math.random() * defaultResponses.length)];
+        }
+        
+        // Add message to chat
+        function addMessage(text, isUser) {
+            const chatArea = document.getElementById('chatArea');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user-message' : 'bot-message'}`;
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+            contentDiv.innerHTML = text.replace(/\n/g, '<br>');
+            
+            messageDiv.appendChild(contentDiv);
+            chatArea.appendChild(messageDiv);
+            
+            // Scroll to bottom
+            chatArea.scrollTop = chatArea.scrollHeight;
+        }
+        
+        // Show typing indicator
+        function showTypingIndicator() {
+            const chatArea = document.getElementById('chatArea');
+            const typingDiv = document.createElement('div');
+            typingDiv.className = 'message bot-message';
+            typingDiv.id = 'typingIndicator';
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+            contentDiv.innerHTML = '<span class="typing"><span>.</span><span>.</span><span>.</span></span>';
+            
+            typingDiv.appendChild(contentDiv);
+            chatArea.appendChild(typingDiv);
+            chatArea.scrollTop = chatArea.scrollHeight;
+        }
+        
+        // Remove typing indicator
+        function removeTypingIndicator() {
+            const indicator = document.getElementById('typingIndicator');
+            if (indicator) {
+                indicator.remove();
+            }
+        }
+        
+        // Send message function
+        function sendMessage() {
+            const inputField = document.getElementById('userInput');
+            const userMessage = inputField.value.trim();
+            
+            if (userMessage === "") {
+                // Shake animation for empty input
+                inputField.style.transform = 'shake 0.5s';
+                setTimeout(() => {
+                    inputField.style.transform = '';
+                }, 500);
+                return;
+            }
+            
+            // Add user message
+            addMessage(userMessage, true);
+            inputField.value = '';
+            
+            // Show typing indicator
+            showTypingIndicator();
+            
+            // Get bot response after delay
+            setTimeout(() => {
+                removeTypingIndicator();
+                const botResponse = getBotResponse(userMessage);
+                addMessage(botResponse, false);
+            }, 500);
+        }
+        
+        // Quick message function
+        function sendQuickMessage(message) {
+            document.getElementById('userInput').value = message;
+            sendMessage();
+        }
+        
+        // Handle enter key press
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+        
+        // Auto-focus input on page load
+        window.onload = function() {
+            document.getElementById('userInput').focus();
+        };
+    </script>
+</body>
+</html>
